@@ -2,15 +2,25 @@ package main;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Ellipse2D;
+import java.util.ArrayList;
 
-public class Canvas extends JPanel {
+public class Canvas extends JPanel implements MouseListener, MouseMotionListener {
 
-    public static Pedina[][] board;
-    private Timer timer;
+    public static Pin[][] board;
+    private static ArrayList<int[]> greenCells;
+    private static int[] selectedPin;
+    private static int turnCounter;
+    private static boolean whiteTurn;
 
-     Canvas() {
+    Canvas() {
         // Panel
         this.setPreferredSize(new Dimension(500, 500));
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
         this.setFocusable(true);
 
         // Frame
@@ -22,19 +32,25 @@ public class Canvas extends JPanel {
         frame.setVisible(true);
 
         // Board
-        board = new Pedina[8][8];
+        board = new Pin[8][8];
         for (int i = 0; i < board.length - 6; i++)
             for (int j = 0; j < board[i].length; j++)
-                board[i][j] = new Pedina(Color.BLACK);
+                board[i][j] = new Pin(Color.BLACK, new int[]{i, j});
 
         for (int i = 6; i < board.length; i++)
             for (int j = 0; j < board[i].length; j++)
-                board[i][j] = new Pedina(Color.WHITE);
+                board[i][j] = new Pin(Color.WHITE, new int[]{i, j});
+
+        // Variables
+        greenCells = new ArrayList<>();
+        turnCounter = 0;
     }
 
     public void start() {
-        timer = new Timer(0,(ae)-> {
+        Timer timer = new Timer(0,(ae)-> {
             repaint();
+
+            whiteTurn = turnCounter % 2 == 0;
         });
         timer.setDelay(5); // ms
         timer.start();
@@ -66,5 +82,74 @@ public class Canvas extends JPanel {
                     g2.fillOval(j * 50 + 5, i * 50 + 5, 40, 40);
                 }
             }
+
+        // Show available moves if any
+        g2.setColor(new Color(0x59009A00, true));
+        for (int[] greenCell : greenCells)
+            g2.fillRect(greenCell[1] * 50, greenCell[0] * 50, 50, 50);
+    }
+
+
+    // Mouse Listener
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+        int eX = e.getX() / 50;
+        int eY = e.getY() / 50;
+
+        // Position update
+        for (int[] greenCell : greenCells) {
+            if (greenCell[0] == eY && greenCell[1] == eX) {
+                board[selectedPin[0]][selectedPin[1]].moveTo(greenCell[1], greenCell[0]);
+                greenCells = new ArrayList<>();
+                turnCounter++;
+                return;
+            }
+        }
+
+        // Available moves
+        Color color;
+        if (whiteTurn) color = Color.WHITE;
+        else color = Color.BLACK;
+
+        if (new Ellipse2D.Double(eX * 50 + 5, eY * 50 + 5, 40, 40).contains(e.getPoint()) &&
+                board[eY][eX] != null &&
+                board[eY][eX].getColor() == color) {
+            greenCells = board[eY][eX].getAvailableMoves();
+            selectedPin = new int[]{eY, eX};
+        }
+        else
+            greenCells = new ArrayList<>();
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
     }
 }

@@ -6,7 +6,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-        new Canvas();
-        //SwingUtilities.invokeLater(()-> new Canvas().start());
+        SwingUtilities.invokeLater(()-> new Canvas().start());
     }
 }
