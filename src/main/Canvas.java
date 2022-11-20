@@ -24,6 +24,7 @@ public class Canvas extends JPanel {
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // grafica
+        g2.setColor(new Color(0x000000));
+        g2.fillOval(50, 50, 10, 10);
     }
 }
